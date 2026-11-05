@@ -18,13 +18,24 @@
 
 ### 作为 DSH 技能
 
+DSH 实时扫描的用户级技能根是 **`~/.dsh/skills`**（项目级是 `<工作区>/.dsh/skills`），放进去即生效，不用重启、不用改 `settings.yaml`：
+
 ```powershell
-$dst = "$env:USERPROFILE\.dsh\profiles\desktop\skills\chaoxing-exam-automation"
+$dst = "$env:USERPROFILE\.dsh\skills\chaoxing-exam-automation"
 New-Item -ItemType Directory -Force -Path $dst | Out-Null
-Copy-Item -Recurse -Force .\* $dst
+robocopy . $dst /E /XD .git /NFL /NDL /NJH /NJS /NP
 ```
 
-或直接 git clone 到该目录。
+或直接 `git clone https://github.com/HanKuCha/chaoxing-exam-automation.git "$env:USERPROFILE\.dsh\skills\chaoxing-exam-automation"`（clone 进来的 `.git` 不影响扫描）。
+
+注意两个**不是**扫描根的路径，别装错：
+
+| 路径 | 实际情况 |
+|---|---|
+| `~/.dsh/profiles/<profile>/skills/` | 该目录里的技能来自插件 `customSkillDirs` 的副本，不是扫描来源 |
+| `~/.dsh/plugins/*/skills/` | 随插件分发的同名副本，改动不会生效 |
+
+验证是否装好：对 DSH 说一句"用 chaoxing-exam-automation 技能"，能加载出完整 `SKILL.md` 即成功；技能列表里应能看到 `chaoxing-exam-automation`。
 
 ### 依赖
 
