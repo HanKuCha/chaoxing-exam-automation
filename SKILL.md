@@ -1,6 +1,6 @@
 ---
 name: chaoxing-exam-automation
-description: Use when the user asks to take or answer a Chaoxing (学习通 / 超星 / mooc1-api.chaoxing.com) exam in their own logged-in browser — reading all questions out of the exam preview iframe, selecting answers by real DOM selector, and verifying every choice. Two hard gates: the user normally enters the exam (the slider captcha is only attempted when the user explicitly tells you to enter it yourself), and the skill NEVER clicks 交卷 — after verifying it stops and reports that the paper is done, waiting for the user to submit.
+description: Use when the user asks to take or answer a Chaoxing (学习通 / 超星 / mooc1-api.chaoxing.com) exam in their own logged-in browser — reading all questions out of the exam preview iframe, selecting answers by real DOM selector, and verifying every choice. Two hard gates apply — the user normally enters the exam (the slider captcha is only attempted when the user explicitly says to enter it yourself), and the skill NEVER clicks 交卷 (after verifying it stops and reports the paper is done, waiting for the user to submit).
 ---
 
 # 学习通 / 超星 考试自动答题

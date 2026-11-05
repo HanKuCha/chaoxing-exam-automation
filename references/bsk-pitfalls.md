@@ -77,3 +77,18 @@ bsk_session({ action: "sync", settle: true })
 | `requires the context returned by the latest cooperate sync` | context 已消耗 | 重新 sync |
 | `depends_on requires at most 16 observed refs/selectors` | dependsOn 太长 | 只挑目标区附近的 |
 | `action may already have completed; inspect the step receipt` | step 动作结果不确定 | **不要重放**，先 extract 看实际状态 |
+
+## 9. 写技能本身：frontmatter 里的裸冒号会让整个技能消失
+
+改 `SKILL.md` 的 `description` 时踩过一次：写成
+
+```
+description: ... Two hard gates: the user normally enters the exam ...
+```
+
+之后技能从 DSH 技能目录里**彻底消失**，`skill({name:"..."})` 直接报
+`Error: skill "..." is unknown or no longer available`。原因是 frontmatter 是 YAML，
+`description` 是未加引号的裸标量，其中的 `": "` 被解析成键值分隔符，整份文件解析失败被丢弃。
+
+规避：`description` 保持单行、不加引号，并且**不要出现 `": "`**——要表达"X 是 Y"就换成破折号或 `—`。
+改完立刻 `skill()` 拉一次验证，别等到用的时候才发现技能没了。
