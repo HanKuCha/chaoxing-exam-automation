@@ -2,6 +2,18 @@
 
 所有改动按 [Semantic Versioning](https://semver.org/lang/zh-CN/) 记录。
 
+## [1.1.1] — 2026-11-05
+
+修复前一个 tag 里的致命问题：照 v1.1.0 克隆下来，技能根本加载不起来。
+
+### Fixed
+
+- `SKILL.md` frontmatter 的 `description` 是 YAML 裸标量，里面写的 `Two hard gates: the user ...` 含 `": "`，被解析成键值分隔符，整份文件解析失败、技能被丢弃，`skill()` 报 `unknown or no longer available`。改为破折号表述。
+- `references/bsk-pitfalls.md` 新增第 9 条，记录这个坑与规避方式。
+
+### Unchanged
+
+- 两个硬门禁（用户进考场 / 技能不交卷）与 1.1.0 完全一致。
 ## [1.1.0] — 2026-11-05
 
 行为变更：把两处"默认替用户做"改成"默认交给用户"，并写成技能最前面的硬门禁。

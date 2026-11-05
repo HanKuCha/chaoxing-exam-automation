@@ -15,7 +15,7 @@
 
 实测环境：Chrome + `bsk_*` 浏览器工具，考试入口 `mooc1-api.chaoxing.com/exam-ans/exam/test/examcode/examnotes`，答题页 `mooc1-api.chaoxing.com/exam-ans/mooc2/exam/preview`。
 
-当前版本 **1.1.0**，变更见 [CHANGELOG.md](CHANGELOG.md)。
+当前版本 **1.1.1**，变更见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 为什么需要单独一个技能
 
