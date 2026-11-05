@@ -1,8 +1,21 @@
 # chaoxing-exam-automation
 
-给 DeepSeek Harness（DSH）用的技能：在你已登录的 Chromium 里接管一场**学习通 / 超星（chaoxing）**考试——过说明页、读题、勾选、复核、交卷。
+给 DeepSeek Harness（DSH）用的技能：在你已登录的 Chromium 里接管一场**学习通 / 超星（chaoxing）**考试的**答题部分**——读题、勾选、复核。
+
+默认由你自己进考场、自己点交卷；技能只负责把答案点对。
+
+## 两个硬门禁
+
+| 门禁 | 规则 |
+|---|---|
+| **1 · 谁进考场** | 默认用户进。技能把说明页准备好（勾同意、点开始、点「进入考试」），碰到滑块就交回控制权。**只有用户明确说了「你自己进考试」，才允许技能自己拉滑块。** |
+| **2 · 谁点交卷** | 默认用户点。技能答完、复核无误后**停手**，报告"已做完、等你交卷"，保持会话不退出。**只有用户明确说了「答完帮我交卷」，才允许点交卷。** |
+
+判不准就算"没说"。这两条写在 `SKILL.md` 最前面，优先级高于后面所有阶段；阶段 5「交卷」明确标注为"需授权"。
 
 实测环境：Chrome + `bsk_*` 浏览器工具，考试入口 `mooc1-api.chaoxing.com/exam-ans/exam/test/examcode/examnotes`，答题页 `mooc1-api.chaoxing.com/exam-ans/mooc2/exam/preview`。
+
+当前版本 **1.1.0**，变更见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 为什么需要单独一个技能
 
@@ -46,7 +59,15 @@ robocopy . $dst /E /XD .git /NFL /NDL /NJH /NJS /NP
 
 装好后对 DSH 说"帮我做一下这份学习通考试"即可触发；也可以手动按 `SKILL.md` 的阶段走。
 
-交卷前复核：
+三种常见指令的实际行为：
+
+| 你说 | 技能做什么 |
+|---|---|
+| 帮我做这份考试 | 准备好进入页 → 请你拖滑块并进考场 → 答题 → 复核 → 报告"做完了，等你交卷" |
+| 你自己进考试，帮我做完 | 自己试滑块（最多 4 次，不过仍请你）→ 答题 → 复核 → 报告"做完了，等你交卷" |
+| 你自己进，做完直接帮我交卷 | 同上，但复核通过后执行交卷并回报"交卷成功"页信息 |
+
+答完后复核（不是交卷前——本技能不交卷）：
 
 ```bash
 # 从 bsk_inspect extract 的返回存成 extract.json
@@ -54,7 +75,15 @@ node scripts/verify-answers.mjs --extract extract.json --emit-key key.json   # �
 node scripts/verify-answers.mjs --extract extract.json --key key.json        # 逐题比对
 ```
 
-输出示例：
+全部一致时：
+
+```
+----------------------------------------------------------------
+全部 15 题与答案表一致，答题完成。
+下一步：停手并通知用户交卷（本技能不自动交卷，除非用户明确授权）。
+```
+
+有不一致时：
 
 ```
 #   qid          选项            已选    应为    结果
@@ -63,7 +92,7 @@ node scripts/verify-answers.mjs --extract extract.json --key key.json        # �
 9   886801701    A/B/C/D         A       B       MISMATCH
 15  886801707    true/false      -       false   UNANSWERED
 ----------------------------------------------------------------
-发现 2 处问题，先修正再交卷：
+发现 2 处问题，先修正再复核：
   第 9 题 (qid 886801701) [MISMATCH] 点了 A，应为 B
     target: span.num_option[qid="886801701"][data="B"]
 ```
@@ -83,7 +112,7 @@ node scripts/verify-answers.mjs --extract extract.json --key key.json        # �
 ## 目录
 
 ```
-SKILL.md                     主流程（阶段 0 侦察 → 1 进入 → 2 读取 → 3 作答 → 4 复核 → 5 交卷）
+SKILL.md                     两门禁 + 主流程（阶段 0 侦察 → 1 进入 → 2 读取 → 3 作答 → 4 复核 → 5 交卷〔需授权〕）
 references/chaoxing-dom.md   真实 DOM、选择器、滑块验证码结构、交卷弹窗
 references/bsk-pitfalls.md   bsk 工具在该页上的 8 类坑与错误速查表
 scripts/verify-answers.mjs   交卷前逐题复核
@@ -94,14 +123,15 @@ scripts/fixtures/            回归测试数据（真实提取结果的脱敏副
 
 ```bash
 node scripts/verify-answers.mjs --extract scripts/fixtures/extract-sample.json --key scripts/fixtures/answer-key.json
-# 期望：全部 15 题与答案表一致，可以交卷；退出码 0
+# 期望：全部 15 题与答案表一致；退出码 0
 ```
 
 `scripts/fixtures/extract-broken.json` 是故意做坏的样本（第 9 题错选、第 15 题漏答），对应期望输出 2 处问题、退出码 1。
 
 ## 边界
 
-- 滑块拼图验证码**不尝试自动破解**：背景图是自然照片，列像素统计无法定位缺口；单段位移拖动会被判为机器轨迹并刷新图片。技能里直接转人工（`bsk_assist request-help`），这是最快路径。
+- **滑块拼图验证码默认不碰**：背景图是自然照片，列像素统计无法定位缺口；单段位移拖动会被判为机器轨迹并刷新图片。默认路径是 `bsk_assist request-help` 请用户拖一次——最快也最稳。用户明确说"你自己进考试"才允许试 4 次，不过就转人工。
+- **不自动交卷**：复核通过就停手，报告完成并保持会话。交卷权在用户手里，除非用户在指令里明确交给你。
 - 只操作用户本人账号、用户明确指定的那份试卷；不导出 cookie/token，不调成绩接口，不碰他人作答记录。
 - 答案正确性由答题者负责。本技能解决的是"怎么在这套页面上点得动、点得准、点完能验"，不是"选什么是对的"。
 

@@ -23,12 +23,22 @@ if (!el.className.includes('agree_checked')) {
 document.getElementById('startBtn').click();
 ```
 
-滑块出现后：
+滑块出现后（**默认：用户没说让你自己进，就走这条**）：
 
 ```text
 bsk_assist({"action":"request-help","prompt":"请手动拖动滑块完成安全验证"})
+bsk_session({"action":"wait-user"})
 bsk_session({"action":"sync","settle":true})
 ```
+
+只有用户明确授权「你自己进考试」时，才允许自己试：
+
+```text
+bsk_interact({"action":"drag","session":"<SID>","contextId":"<CTX>",
+  "target":"#cx_rightBtn","deltaX":<缺口X>,"durationMs":900})
+```
+
+失败会刷新图片，最多 4 次，仍不过就回到 request-help。
 
 ## 读全部作答状态
 
@@ -56,7 +66,15 @@ bsk_interact({"action":"click","session":"<SID>","contextId":"<CTX>",
   "dependsOn":["span.num_option[qid=\"<QID>\"][data=\"<目标值>\"]"]})
 ```
 
-## 交卷
+## 复核通过后的默认收尾（不交卷）
+
+```text
+bsk_inspect({"action":"screenshot","session":"<SID>"})
+```
+
+然后正文告诉用户：全部题目已作答并核对无误，等你确认后自己点交卷。**不要 stop 会话**——用户可能要你看着。
+
+## 交卷（仅在用户明确授权「答完帮我交卷」时）
 
 ```text
 bsk_session({"action":"sync","maxTokens":3000})

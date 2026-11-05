@@ -54,7 +54,9 @@ if (!el.className.includes('agree_checked')) {
 | 轨道 | `#cx_hkinnerWrap` | 320×42 @ (419,419) |
 | 拖动按钮 | `#cx_rightBtn` | 40×40 @ (420,420) |
 
-实测结论：把背景图以 `crossOrigin='anonymous'` 载入 canvas 后按列统计暗像素，命中范围铺满 0–319（自然照片噪点），定位失败；直接 `bsk_interact drag` 单段位移也会被判定为机器轨迹并刷新图片。**这一关交给人工**，用 `bsk_assist({ action: "request-help" })` 请用户拖一次，比在算法上硬碰省时间。
+实测结论：把背景图以 `crossOrigin='anonymous'` 载入 canvas 后按列统计暗像素，命中范围铺满 0–319（自然照片噪点），定位失败；直接 `bsk_interact drag` 单段位移也会被判定为机器轨迹并刷新图片。
+
+**处置按门禁 1**：用户没明确说让你自己进考试，就用 `bsk_assist({ action: "request-help" })` 请用户拖一次，比在算法上硬碰省时间；用户明确授权了才允许 `bsk_interact drag` 试，最多 4 次，不过仍转人工。
 
 ## 答题页（整卷预览）
 

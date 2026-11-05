@@ -176,10 +176,11 @@ function main() {
     return 0;
   }
   if (bad.length === 0) {
-    console.log(`全部 ${questions.length} 题与答案表一致，可以交卷。`);
+    console.log(`全部 ${questions.length} 题与答案表一致，答题完成。`);
+    console.log('下一步：停手并通知用户交卷（本技能不自动交卷，除非用户明确授权）。');
     return 0;
   }
-  console.log(`发现 ${bad.length} 处问题，先修正再交卷：`);
+  console.log(`发现 ${bad.length} 处问题，先修正再复核：`);
   for (const b of bad) {
     const hint =
       b.verdict === 'MISMATCH'
